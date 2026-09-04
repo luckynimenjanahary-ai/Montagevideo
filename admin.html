@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="mg">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Admin</title>
+</head>
+<body>
+    <h1>Panel d'Administration</h1>
+
+    <!-- FORMULAIRE AMPIDIRANA VIDEO -->
+    <div style="border: 1px solid #ccc; padding: 15px;">
+        <h2>Ampidiro ny Video Tuto Vaovao</h2>
+        <form id="addVideoForm">
+            <input type="text" id="videoTitle" placeholder="Anaran'ny Video" required><br><br>
+            <input type="text" id="videoUrl" placeholder="Lien Embed Youtube (https://www.youtube.com/embed/XXXX)" required><br><br>
+            
+            <label>Niveau:</label>
+            <select id="videoNiveau">
+                <option value="debutant">Débutant (3 000 Ar)</option>
+                <option value="extreme">Extrême (6 000 Ar)</option>
+                <option value="pro">Pro (12 000 Ar)</option>
+            </select><br><br>
+
+            <button type="submit">Ampidiro ny Video</button>
+        </form>
+    </div>
+
+    <hr>
+
+    <!-- OMENA ACCES IRAY IRAY IREO USERS -->
+    <h2>Fitantanana ny Accès an'ireo Mpampiasa</h2>
+    <div id="usersList"></div>
+
+    <script>
+        // Jerena raha Admin no miditra
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser || !currentUser.isAdmin) {
+            alert("Tsy mahazo lalana hiditra eto ianao!");
+            window.location.href = "login.html";
+        }
+
+        // AMPIDIRINA NY VIDEO VAOVAO
+        document.getElementById('addVideoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const title = document.getElementById('videoTitle').value;
+            const url = document.getElementById('videoUrl').value;
+            const niveau = document.getElementById('videoNiveau').value;
+
+            let videos = JSON.parse(localStorage.getItem('videos')) || [];
+            videos.push({ title: title, url: url, niveau: niveau });
+            
+            localStorage.setItem('videos', JSON.stringify(videos));
+            alert("Tafiditra ny Video!");
+            this.reset();
+        });
+
+        // MANOME ACCES AMIN'NY MPAMPIASA
+        function loadUsers() {
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+            let container = document.getElementById('usersList');
+            container.innerHTML = "";
+
+            users.forEach((user, index) => {
+                container.innerHTML += `
+                    <div style="border:1px solid #000; margin:10px; padding:10px;">
+                        <p><b>Email:</b> ${user.email}</p>
+                        <button onclick="toggleAcces(${index}, 'debutant')">
+                            Débutant: ${user.acces.debutant ? 'OK ✅' : 'Tsy mbola ❌'}
+                        </button>
+                        <button onclick="toggleAcces(${index}, 'extreme')">
+                            Extrême: ${user.acces.extreme ? 'OK ✅' : 'Tsy mbola ❌'}
+                        </button>
+                        <button onclick="toggleAcces(${index}, 'pro')">
+                            Pro: ${user.acces.pro ? 'OK ✅' : 'Tsy mbola ❌'}
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function toggleAcces(userIndex, niveau) {
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+            users[userIndex].acces[niveau] = !users[userIndex].acces[niveau];
+            localStorage.setItem('users', JSON.stringify(users));
+            loadUsers(); // Refresh ny lisitra
+        }
+
+        loadUsers();
+    </script>
+</body>
+</html>
