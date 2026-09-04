@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="mg">
+<head>
+    <meta charset="UTF-8">
+    <title>Espace Cours Video</title>
+</head>
+<body>
+    <h1 id="titreNiveau"></h1>
+    <div id="videoContainer"></div>
+
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        
+        // Raha tsy mbola connecté
+        if (!currentUser) {
+            alert("Mila se connecter aloha ianao!");
+            window.location.href = "login.html";
+        }
+
+        // Alaina amin'ny URL ny niveau jereny (ohatra: cours.html?niveau=debutant)
+        const urlParams = new URLSearchParams(window.location.search);
+        const niveau = urlParams.get('niveau'); 
+
+        document.getElementById('titreNiveau').innerText = "TUTO Montage - Niveau " + niveau.toUpperCase();
+
+        // Jerena ao amin'ny lisitry ny users vaovao ny acces-ny
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        let myAccount = users.find(u => u.email === currentUser.email);
+
+        // CHECKE-NA RAHA MANANA ACCES IZY
+        if (!myAccount || !myAccount.acces[niveau]) {
+            document.getElementById('videoContainer').innerHTML = `
+                <h3 style="color:red;">Mbola tsy manana accès amin'ity niveau ity ianao.</h3>
+                <p>Mandoava sara amin'ny MVola dia alefaso ny SMS fankatoavana amin'ny Admin.</p>
+            `;
+        } else {
+            // Aseho ireo video ampidirin'ny Admin
+            let videos = JSON.parse(localStorage.getItem('videos')) || [];
+            let filteredVideos = videos.filter(v => v.niveau === niveau);
+
+            let html = "";
+            filteredVideos.forEach(v => {
+                html += `
+                    <div style="margin-bottom:20px;">
+                        <h3>${v.title}</h3>
+                        <iframe width="560" height="315" src="${v.url}" frameborder="0" allowfullscreen></iframe>
+                    </div>
+                `;
+            });
+
+            if(filteredVideos.length === 0) {
+                html = "<p>Mbola tsy misy video ampidirin'ny Admin amin'ity niveau ity.</p>";
+            }
+
+            document.getElementById('videoContainer').innerHTML = html;
+        }
+    </script>
+</body>
+</html>
